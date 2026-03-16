@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+
+      <div class="col-lg-6">
+        <!-- Status pill -->
+        <div class="d-inline-flex align-items-center mb-4 px-3 py-2 rounded-pill"
+             style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.25); font-size:.85rem; color:#4ade80;">
+          <span class="dot pulse-green"></span> System Live &amp; Operational
+        </div>
+
+        <h1 class="hero-title anim-fade-up delay-1">
+          Find What's <span class="text-gradient-purple">Lost</span>,<br>
+          Return What's <span class="text-gradient-cyan">Found</span>.
+        </h1>
+
+        <p class="hero-sub anim-fade-up delay-2">
+          A secure, community-driven platform to connect those who've lost items
+          with those who've found them. Report, search, and reunite — all in one place.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 anim-fade-up delay-3">
+          <a href="{{ url_for('dashboard') }}" class="btn-sk-primary">Browse Dashboard</a>
+          {% if not session.get('user_id') %}
+          <a href="{{ url_for('signup') }}" class="btn-sk-secondary">Join for Free</a>
+          {% else %}
+          <a href="{{ url_for('report') }}" class="btn-sk-secondary">Report an Item</a>
+          {% endif %}
+        </div>
+
+        <!-- Badge row -->
+        <div class="badge-pill-row anim-fade-up delay-4">
+          <span class="badge-pill"><span class="badge-check">✓</span> Free to Use</span>
+          <span class="badge-pill"><span class="badge-check">✓</span> Secure &amp; Private</span>
+          <span class="badge-pill"><span class="badge-check">✓</span> Image Upload</span>
+          <span class="badge-pill"><span class="badge-check">✓</span> Community Driven</span>
+        </div>
+      </div>
+
+      <!-- Right illustration card -->
+      <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+        <div class="glass-card-hero p-5 text-center reveal" style="max-width:420px;width:100%;">
+          <!-- Professional icon group -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px;">
+            <div style="width:64px;height:64px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-magnifying-glass" style="color:#a78bfa;font-size:1.6rem;"></i>
+            </div>
+            <div style="width:64px;height:64px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-location-dot" style="color:#4ade80;font-size:1.6rem;"></i>
+            </div>
+            <div style="width:64px;height:64px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-handshake" style="color:#22d3ee;font-size:1.6rem;"></i>
+            </div>
+          </div>
+          <h3 style="font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:8px;">Community Search</h3>
+          <p style="color:var(--muted);font-size:.9rem;margin-bottom:24px;">
+            Browse hundreds of reported items instantly. Filter by type, date, and category.
+          </p>
+          <a href="{{ url_for('dashboard') }}" class="btn-sk-primary" style="width:100%; justify-content:center;">
+            <i class="fa-solid fa-magnifying-glass me-2"></i>Browse Items
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FEATURES ══════════════ -->
+<section class="section">
+  <div class="section-inner">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">Simple &amp; Powerful</h2>
+    <p class="section-sub">Three easy steps to reunite people with their belongings.</p>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 reveal">
+          <div class="card-icon" style="background:rgba(59,130,246,0.12);border-color:rgba(59,130,246,0.2);">
+            <i class="fa-solid fa-magnifying-glass" style="color:#60a5fa;font-size:1.2rem;"></i>
+          </div>
+          <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:12px;color:#fff;">Search Easily</h3>
+          <p style="color:var(--muted);font-size:.9rem;line-height:1.7;">
+            Browse the dashboard to see if someone has already found and reported your lost item. Filter by category and date.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 reveal" style="--delay:.12s;">
+          <div class="card-icon" style="background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.2);">
+            <i class="fa-regular fa-paper-plane" style="color:#a78bfa;font-size:1.2rem;"></i>
+          </div>
+          <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:12px;color:#fff;">Report Quickly</h3>
+          <p style="color:var(--muted);font-size:.9rem;line-height:1.7;">
+            Post a detailed description and upload a photo of what you lost or found in seconds. Our smart system highlights potential matches.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 reveal" style="--delay:.24s;">
+          <div class="card-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.2);">
+            <i class="fa-solid fa-handshake" style="color:#4ade80;font-size:1.2rem;"></i>
+          </div>
+          <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:12px;color:#fff;">Connect Securely</h3>
+          <p style="color:var(--muted);font-size:.9rem;line-height:1.7;">
+            Verify ownership through the platform and safely return items to their rightful owners.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ STATS ══════════════ -->
+<section class="section section-dark">
+  <div class="section-inner">
+    <h2 class="section-title reveal">Platform at a Glance</h2>
+    <p class="section-sub reveal" style="--delay:.08s;">Helping the community every day.</p>
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3">
+        <div class="card reveal">
+          <div style="font-size:2.8rem;font-weight:900;letter-spacing:-1px;color:#fff;">{{ total_items }}</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">Items Reported</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card reveal" style="--delay:.08s;">
+          <div style="font-size:2.8rem;font-weight:900;letter-spacing:-1px;color:#4ade80;">{{ resolved_count }}</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">Items Resolved</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card reveal" style="--delay:.16s;">
+          <div style="font-size:2.8rem;font-weight:900;letter-spacing:-1px;color:#a78bfa;">{{ total_users }}</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">Registered Users</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card reveal" style="--delay:.24s;">
+          <div style="font-size:2.8rem;font-weight:900;letter-spacing:-1px;color:#22d3ee;">{{ found_count }}</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">Items Found</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if not session.get('user_id') %}
+<!-- ══════════════ CTA ══════════════ -->
+<section class="section text-center">
+  <div class="section-inner" style="max-width:650px;">
+    <h2 class="section-title reveal">Ready to Get Started?</h2>
+    <p class="section-sub reveal" style="--delay:.08s;">
+      Join our community and help people get their belongings back.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap reveal" style="--delay:.16s;">
+      <a href="{{ url_for('signup') }}" class="btn-sk-primary">Create Free Account</a>
+      <a href="{{ url_for('login') }}" class="btn-sk-secondary">Sign In</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

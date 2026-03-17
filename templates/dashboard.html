@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <p class="section-label">Community Board</p>
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+      <h1 class="section-title" style="text-align:left;font-size:clamp(24px,3.5vw,40px);margin-bottom:0;">
+        Browse All Items
+        <span style="font-size:1rem;font-weight:400;color:var(--muted2);margin-left:10px;">{{ total }} item{{ 's' if total != 1 }}</span>
+      </h1>
+      <!-- Sort dropdown -->
+      <div>
+        <select class="form-select" id="sortSelect" style="width:auto;font-size:.87rem;background:var(--bg-card);color:white;border-color:var(--border);border-radius:var(--radius-pill);padding:8px 16px;">
+          <option value="newest" {% if sort_by=='newest' %}selected{% endif %}>Newest First</option>
+          <option value="oldest" {% if sort_by=='oldest' %}selected{% endif %}>Oldest First</option>
+          <option value="category" {% if sort_by=='category' %}selected{% endif %}>Category A–Z</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search + Filter -->
+  <form method="GET" action="{{ url_for('dashboard') }}" id="dashForm" class="mb-4">
+    <input type="hidden" name="sort" id="sortInput" value="{{ sort_by }}">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-6">
+        <div class="input-sk-group mb-0">
+          <label for="searchQ">Search</label>
+          <div style="position:relative;">
+            <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted2);"></i>
+            <input type="text" class="form-control" id="searchQ" name="q"
+                   value="{{ q }}" placeholder="Search by title or description…" style="padding-left:42px;">
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="filter-tabs">
+          <a href="{{ url_for('dashboard', sort=sort_by, q=q) }}"
+             class="filter-tab {% if not filter_type %}active{% endif %}">All</a>
+          <a href="{{ url_for('dashboard', type='lost', sort=sort_by, q=q) }}"
+             class="filter-tab tab-lost {% if filter_type=='lost' %}active{% endif %}">
+            <i class="fa-solid fa-circle-exclamation me-1"></i>Lost
+          </a>
+          <a href="{{ url_for('dashboard', type='found', sort=sort_by, q=q) }}"
+             class="filter-tab tab-found {% if filter_type=='found' %}active{% endif %}">
+            <i class="fa-solid fa-circle-check me-1"></i>Found
+          </a>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn-sk-primary w-100" style="padding:12px;justify-content:center;">Search</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Items Grid -->
+  {% if items %}
+  <div class="row g-4">
+    {% for item in items %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="item-card reveal" style="--delay:{{ loop.index0 * 0.05 }}s;">
+        <span class="item-badge badge-{{ item.type }}">{{ item.type }}</span>
+        {% if item.image_filename %}
+        <img src="{{ item.image_filename }}"
+             class="card-img-top" alt="{{ item.title }}">
+        {% else %}
+        <div class="card-img-top d-flex align-items-center justify-content-center"
+             style="background:var(--bg-sect);border-bottom:1px solid var(--border);">
+          <i class="fa-regular fa-image" style="font-size:2.5rem;color:var(--muted2);"></i>
+        </div>
+        {% endif %}
+        <div class="card-body">
+          <h5 style="font-weight:700;color:#fff;margin-bottom:6px;font-size:1rem;">{{ item.title }}</h5>
+          <p style="color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:12px;">
+            {{ item.description[:90] ~ '…' if item.description|length > 90 else item.description }}
+          </p>
+          <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.82rem;color:var(--muted2);">
+            <i class="fa-solid fa-location-dot"></i> {{ item.location }}
+          </div>
+          <div class="d-flex align-items-center gap-2 mb-3" style="font-size:.82rem;color:var(--muted2);">
+            <i class="fa-regular fa-calendar"></i> {{ item.date_reported }}
+          </div>
+          {% if item.status == 'resolved' %}
+          <span class="badge-resolved mb-2 d-inline-block">✓ Resolved</span>
+          {% endif %}
+          <a href="{{ url_for('item_detail', item_id=item.id) }}"
+             class="btn-sk-secondary mt-auto" style="width:100%;justify-content:center;padding:9px 20px;font-size:.88rem;">
+            View Details →
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <nav class="mt-5 d-flex justify-content-center" aria-label="Item pages">
+    <ul class="pagination" style="gap:6px;">
+      <!-- Prev -->
+      <li class="page-item {% if page == 1 %}disabled{% endif %}">
+        <a class="page-link"
+           href="{{ url_for('dashboard', page=page-1, q=q, type=filter_type, sort=sort_by) }}"
+           style="background:var(--bg-card);border-color:var(--border);color:var(--muted);border-radius:var(--radius-sm);">
+          <i class="fa-solid fa-chevron-left"></i>
+        </a>
+      </li>
+      <!-- Pages -->
+      {% for p in range(1, total_pages+1) %}
+      {% if p == page or p == 1 or p == total_pages or (p >= page-1 and p <= page+1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link"
+           href="{{ url_for('dashboard', page=p, q=q, type=filter_type, sort=sort_by) }}"
+           style="{% if p == page %}background:var(--purple);border-color:var(--purple);color:#fff;{% else %}background:var(--bg-card);border-color:var(--border);color:var(--muted);{% endif %}border-radius:var(--radius-sm);">
+          {{ p }}
+        </a>
+      </li>
+      {% elif p == page-2 or p == page+2 %}
+      <li class="page-item disabled">
+        <span class="page-link" style="background:transparent;border:none;color:var(--muted2);">…</span>
+      </li>
+      {% endif %}
+      {% endfor %}
+      <!-- Next -->
+      <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+        <a class="page-link"
+           href="{{ url_for('dashboard', page=page+1, q=q, type=filter_type, sort=sort_by) }}"
+           style="background:var(--bg-card);border-color:var(--border);color:var(--muted);border-radius:var(--radius-sm);">
+          <i class="fa-solid fa-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5 mt-4">
+    <div style="width:72px;height:72px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="fa-solid fa-magnifying-glass" style="font-size:1.8rem;color:var(--muted2);"></i>
+    </div>
+    <h3 style="font-weight:700;color:#fff;margin-bottom:8px;">No items found</h3>
+    <p style="color:var(--muted);">Try adjusting your search or filter, or be the first to report an item!</p>
+    {% if session.get('user_id') %}
+    <a href="{{ url_for('report') }}" class="btn-sk-primary mt-3">Report an Item</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+// Sort select auto-submits form
+document.getElementById('sortSelect').addEventListener('change', function() {
+  document.getElementById('sortInput').value = this.value;
+  document.getElementById('dashForm').submit();
+});
+</script>
+{% endblock %}

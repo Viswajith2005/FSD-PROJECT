@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  {% if item %}
+  <div class="row g-4">
+
+    <!-- Left: Item Detail -->
+    <div class="col-lg-8">
+      <div class="card">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+          <div>
+            <span class="item-badge badge-{{ item.type }}" style="position:static;display:inline-block;margin-bottom:12px;">{{ item.type | upper }}</span>
+            <h1 style="font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-.5px;margin:0;">{{ item.title }}</h1>
+          </div>
+          {% if item.status == 'resolved' %}
+          <span class="badge-resolved" style="align-self:flex-start;">✓ Resolved</span>
+          {% endif %}
+        </div>
+
+        <!-- Image -->
+        {% if item.image_filename %}
+        <img src="{{ item.image_filename }}"
+             class="img-fluid mb-4" alt="{{ item.title }}"
+             style="border-radius:var(--radius-sm);border:1px solid var(--border);max-height:420px;width:100%;object-fit:cover;cursor:pointer;"
+             data-bs-toggle="modal" data-bs-target="#imageModal">
+        {% endif %}
+
+        <!-- Description -->
+        <p class="section-label" style="text-align:left;margin-bottom:8px;">Description</p>
+        <p style="color:var(--muted);line-height:1.8;font-size:.95rem;margin-bottom:28px;">{{ item.description }}</p>
+
+        <!-- Meta grid -->
+        <div class="row g-3 mb-4">
+          {% for label, val in [('Category', item.category), ('Location', item.location), ('Date Reported', item.date_reported), ('Reported By', item.reporter_name)] %}
+          <div class="col-sm-6">
+            <div style="background:var(--bg-sect);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;">
+              <div style="font-size:.75rem;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">{{ label }}</div>
+              <div style="color:#fff;font-weight:600;">{{ val }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Actions -->
+        {% if session.get('user_id') == item.user_id %}
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('edit_item', item_id=item.id) }}" class="btn-sk-secondary">
+            <i class="fa-solid fa-pen-to-square me-2"></i>Edit
+          </a>
+          {% if item.status == 'open' %}
+          <a href="{{ url_for('resolve_item', item_id=item.id) }}" class="btn-success-pill confirm-resolve">
+            <i class="fa-solid fa-circle-check me-2"></i>Mark Resolved
+          </a>
+          {% endif %}
+          <a href="{{ url_for('delete_item', item_id=item.id) }}" class="btn-danger-pill confirm-delete">
+            <i class="fa-solid fa-trash me-2"></i>Delete
+          </a>
+        </div>
+
+        {% elif session.get('user_id') %}
+        <!-- Contact Poster section -->
+        <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:var(--radius-sm);padding:20px;">
+          <p style="color:var(--muted);font-size:.9rem;margin-bottom:14px;">
+            <i class="fa-solid fa-envelope me-2" style="color:var(--purple);"></i>
+            Think you can help? Send a message directly to <strong style="color:#fff;">{{ item.reporter_name }}</strong>.
+          </p>
+          <button class="btn-sk-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+            <i class="fa-solid fa-paper-plane me-2"></i>Contact the Poster
+          </button>
+        </div>
+
+
+
+        {% else %}
+        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;">
+          <p style="margin:0;color:var(--muted);font-size:.9rem;">
+            <a href="{{ url_for('login') }}" style="color:var(--purple);font-weight:600;">Log in</a> to contact the poster about this item.
+          </p>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- Right: Matches -->
+    <div class="col-lg-4">
+      <div class="card">
+        <h3 style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;">
+          <i class="fa-solid fa-link me-2" style="color:var(--purple);"></i>Possible Matches
+        </h3>
+        <p style="color:var(--muted2);font-size:.82rem;margin-bottom:20px;">Items in the same category that could match.</p>
+        {% if matches %}
+        {% for match in matches %}
+        <a href="{{ url_for('item_detail', item_id=match.id) }}"
+           style="display:block;text-decoration:none;padding:14px 16px;background:var(--bg-sect);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;transition:border-color .2s;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div style="font-weight:600;color:#fff;font-size:.9rem;margin-bottom:2px;">{{ match.title }}</div>
+              <div style="font-size:.8rem;color:var(--muted2);">{{ match.date_reported }}</div>
+            </div>
+            <span class="item-badge badge-{{ match.type }}" style="position:static;display:inline-block;font-size:.7rem;padding:3px 9px;">{{ match.type }}</span>
+          </div>
+        </a>
+        {% endfor %}
+        {% else %}
+        <div class="text-center py-3">
+          <div style="width:52px;height:52px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i class="fa-solid fa-link-slash" style="font-size:1.3rem;color:var(--muted2);"></i>
+          </div>
+          <p style="color:var(--muted2);font-size:.88rem;">No potential matches found yet.</p>
+        </div>
+        {% endif %}
+        <a href="{{ url_for('dashboard') }}" class="btn-sk-secondary mt-2" style="width:100%;justify-content:center;padding:10px;font-size:.87rem;">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <h3 style="color:#fff;">Item not found.</h3>
+    <a href="{{ url_for('dashboard') }}" class="btn-sk-primary mt-3">Back to Dashboard</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Image lightbox modal -->
+{% if item and item.image_filename %}
+<div class="modal fade" id="imageModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content" style="background:rgba(0,0,0,.95);border:1px solid var(--border);">
+      <div class="modal-header" style="border:none;">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-2">
+        <img src="{{ item.image_filename }}"
+             class="img-fluid" alt="{{ item.title }}" style="max-height:80vh;border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Contact Modal -->
+{% if item and session.get('user_id') %}
+<div class="modal fade" id="contactModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);">
+      <div class="modal-header" style="border-color:var(--border);">
+        <h5 class="modal-title" style="color:#fff;font-weight:700;">
+          <i class="fa-solid fa-paper-plane me-2" style="color:var(--purple);"></i>Contact Poster
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('contact_poster', item_id=item.id) }}">
+        <div class="modal-body">
+          <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px;">
+            Your message will be delivered as an in-app notification to <strong style="color:#fff;">{{ item.reporter_name }}</strong>.
+          </p>
+          <div class="input-sk-group mb-0">
+            <label for="contactMsg">Your Message</label>
+            <textarea class="form-control" id="contactMsg" name="message" rows="4"
+                      placeholder="Describe where you found it, your contact details, or any other relevant info…" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-color:var(--border);">
+          <button type="button" class="btn-sk-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-sk-primary">
+            <i class="fa-solid fa-paper-plane me-2"></i>Send Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

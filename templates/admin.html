@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <p class="section-label">Administration</p>
+    <h1 class="section-title" style="text-align:left;font-size:clamp(22px,3vw,36px);">
+      <i class="fa-solid fa-shield-halved me-2" style="color:var(--cyan);"></i>Admin Panel
+    </h1>
+  </div>
+
+  <!-- ══ ANALYTICS SECTION ══ -->
+  <div class="card mb-5 reveal">
+    <p class="section-label" style="text-align:left;margin-bottom:4px;">Platform Overview</p>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:24px;">Analytics</h2>
+
+    <!-- Stat tiles -->
+    <div class="row g-3 mb-4">
+      {% for label, val, color in [
+        ('Total Users', total_users, '#a78bfa'),
+        ('Total Items', total_items, '#fff'),
+        ('Lost Items',  lost_count,  '#f87171'),
+        ('Found Items', found_count, '#4ade80'),
+        ('Resolved',    resolved_count, '#22d3ee'),
+        ('Open',        open_count,  '#facc15')
+      ] %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <div style="background:var(--bg-sect);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 16px;text-align:center;">
+          <div style="font-size:2rem;font-weight:900;color:{{ color }};letter-spacing:-1px;line-height:1.1;">{{ val }}</div>
+          <div style="font-size:.72rem;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Lost vs Found bar -->
+    <div class="mb-4">
+      <div class="d-flex justify-content-between mb-1" style="font-size:.82rem;color:var(--muted2);">
+        <span><i class="fa-solid fa-circle-exclamation me-1" style="color:#f87171;"></i>Lost ({{ lost_count }})</span>
+        <span><i class="fa-solid fa-circle-check me-1" style="color:#4ade80;"></i>Found ({{ found_count }})</span>
+      </div>
+      <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;">
+        {% if total_items > 0 %}
+        <div style="height:100%;width:{{ (lost_count / total_items * 100)|round(1) }}%;background:linear-gradient(90deg,#f87171,#fb923c);border-radius:10px;float:left;"></div>
+        <div style="height:100%;width:{{ (found_count / total_items * 100)|round(1) }}%;background:linear-gradient(90deg,#4ade80,#22d3ee);border-radius:10px;float:left;"></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Category breakdown -->
+    {% if cat_counts %}
+    <p style="font-size:.82rem;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Items by Category</p>
+    <div class="row g-2">
+      {% for cat, count in cat_counts %}
+      <div class="col-md-6">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span style="font-size:.83rem;color:var(--muted);">{{ cat }}</span>
+          <span style="font-size:.8rem;color:var(--muted2);">{{ count }}</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:6px;">
+          <div style="height:100%;width:{{ (count / total_items * 100)|round(1) if total_items else 0 }}%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:6px;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ══ USERS TABLE ══ -->
+  <div class="card mb-5 reveal" style="padding:0;overflow:hidden;">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <p class="section-label" style="text-align:left;margin-bottom:2px;">Registered Accounts</p>
+        <h2 style="font-size:1.2rem;font-weight:700;color:#fff;margin:0;">All Users</h2>
+      </div>
+      <span style="color:var(--muted2);font-size:.85rem;">{{ total_users }} total</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table-dark-miruro">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td style="color:var(--muted2);">{{ user.id }}</td>
+            <td style="color:#fff;font-weight:500;">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              {% if user.is_admin %}
+              <span style="color:var(--cyan);font-size:.8rem;font-weight:600;">
+                <i class="fa-solid fa-shield-halved me-1"></i>Admin
+              </span>
+              {% else %}
+              <span style="color:var(--muted2);font-size:.8rem;">User</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.is_banned %}
+              <span style="color:#f87171;font-size:.8rem;"><i class="fa-solid fa-ban me-1"></i>Banned</span>
+              {% else %}
+              <span style="color:#4ade80;font-size:.8rem;"><i class="fa-solid fa-circle-check me-1"></i>Active</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.id == session.get('user_id') %}
+              <span style="font-size:.78rem;color:var(--muted2);padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius-pill);display:inline-block;">
+                <i class="fa-solid fa-user me-1"></i>Your Account
+              </span>
+              {% else %}
+              <div class="d-flex gap-2 flex-wrap">
+                <!-- Promote / Demote -->
+                <a href="{{ url_for('admin_promote', user_id=user.id) }}"
+                   class="btn-sk-secondary" style="padding:5px 12px;font-size:.76rem;"
+                   title="{{ 'Revoke Admin' if user.is_admin else 'Make Admin' }}">
+                  <i class="fa-solid fa-{{ 'arrow-down' if user.is_admin else 'arrow-up' }} me-1"></i>
+                  {{ 'Demote' if user.is_admin else 'Promote' }}
+                </a>
+                <!-- Ban / Unban -->
+                <a href="{{ url_for('admin_ban', user_id=user.id) }}"
+                   class="{{ 'btn-success-pill' if user.is_banned else 'btn-danger-pill' }} confirm-delete"
+                   style="padding:5px 12px;font-size:.76rem;">
+                  <i class="fa-solid fa-{{ 'lock-open' if user.is_banned else 'ban' }} me-1"></i>
+                  {{ 'Unban' if user.is_banned else 'Ban' }}
+                </a>
+                <!-- Delete -->
+                <a href="{{ url_for('admin_delete_user', user_id=user.id) }}"
+                   class="btn-danger-pill confirm-delete" style="padding:5px 12px;font-size:.76rem;">
+                  <i class="fa-solid fa-trash me-1"></i>Delete
+                </a>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ ITEMS TABLE ══ -->
+  <div class="card reveal" style="padding:0;overflow:hidden;">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <p class="section-label" style="text-align:left;margin-bottom:2px;">Content Moderation</p>
+        <h2 style="font-size:1.2rem;font-weight:700;color:#fff;margin:0;">All Reported Items</h2>
+      </div>
+      <span style="color:var(--muted2);font-size:.85rem;">{{ total_items }} total</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table-dark-miruro">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td style="color:var(--muted2);">{{ item.id }}</td>
+            <td>
+              <a href="{{ url_for('item_detail', item_id=item.id) }}"
+                 style="color:#fff;font-weight:500;text-decoration:none;">{{ item.title }}</a>
+            </td>
+            <td>
+              <span class="item-badge badge-{{ item.type }}"
+                    style="position:static;display:inline-block;font-size:.7rem;padding:3px 9px;">{{ item.type }}</span>
+            </td>
+            <td style="color:var(--muted);">{{ item.category }}</td>
+            <td style="color:var(--muted);">{{ item.location }}</td>
+            <td style="color:var(--muted);">{{ item.date_reported }}</td>
+            <td>
+              {% if item.status == 'resolved' %}
+              <span style="color:#4ade80;font-size:.82rem;font-weight:600;">✓ Resolved</span>
+              {% else %}
+              <span style="color:#facc15;font-size:.82rem;font-weight:600;">Open</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-2 flex-wrap">
+                {% if item.status == 'open' %}
+                <a href="{{ url_for('admin_resolve', item_id=item.id) }}"
+                   class="btn-success-pill" style="font-size:.76rem;padding:5px 10px;">
+                  <i class="fa-solid fa-check me-1"></i>Resolve
+                </a>
+                {% endif %}
+                <a href="{{ url_for('admin_delete_item', item_id=item.id) }}"
+                   class="btn-danger-pill confirm-delete" style="font-size:.76rem;padding:5px 10px;">
+                  <i class="fa-solid fa-trash me-1"></i>Delete
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <div style="max-width:680px;margin:0 auto;">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <p class="section-label">{% if item %}Edit Item{% else %}New Report{% endif %}</p>
+      <h1 class="section-title" style="text-align:left;font-size:clamp(22px,3vw,36px);">
+        {% if item %}Update Item Details{% else %}Report a Lost or Found Item{% endif %}
+      </h1>
+    </div>
+
+    <!-- Form card -->
+    <div class="auth-glass-card" style="max-width:100%;padding:2.5rem 2rem;">
+      <form id="reportForm" method="POST"
+            action="{{ url_for('edit_item', item_id=item.id) if item else url_for('report') }}"
+            enctype="multipart/form-data" novalidate>
+
+        <!-- Type selector -->
+        <div class="input-sk-group mb-4">
+          <label for="reportType">Item Type</label>
+          <select class="form-select" id="reportType" name="type" required>
+            <option value="" disabled {% if not item %}selected{% endif %}>Select type…</option>
+            <option value="lost" {% if item and item.type=='lost' %}selected{% endif %}>Lost</option>
+            <option value="found" {% if item and item.type=='found' %}selected{% endif %}>Found</option>
+          </select>
+        </div>
+
+        <!-- Title -->
+        <div class="input-sk-group mb-4">
+          <label for="reportTitle">Item Title</label>
+          <input type="text" class="form-control" id="reportTitle" name="title"
+                 placeholder="e.g. Blue Leather Wallet"
+                 value="{{ item.title if item else '' }}" required>
+        </div>
+
+        <!-- Category -->
+        <div class="input-sk-group mb-4">
+          <label for="reportCategory">Category</label>
+          <select class="form-select" id="reportCategory" name="category" required>
+            <option value="" disabled {% if not item %}selected{% endif %}>Choose category…</option>
+            {% for cat in ['Electronics','Clothing','Accessories','Documents','Keys','Bag/Wallet','Sports Equipment','Books','Jewellery','Other'] %}
+            <option value="{{ cat }}" {% if item and item.category==cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="input-sk-group mb-4">
+          <label for="reportDesc">Description</label>
+          <textarea class="form-control" id="reportDesc" name="description" rows="4"
+                    placeholder="Describe the item in detail — colour, brand, distinguishing marks…" required>{{ item.description if item else '' }}</textarea>
+        </div>
+
+        <!-- Location -->
+        <div class="input-sk-group mb-4">
+          <label for="reportLocation">Location</label>
+          <input type="text" class="form-control" id="reportLocation" name="location"
+                 placeholder="Where was it lost / found?"
+                 value="{{ item.location if item else '' }}" required>
+        </div>
+
+        <!-- Date -->
+        <div class="input-sk-group mb-4">
+          <label for="reportDate">Date</label>
+          <input type="date" class="form-control" id="reportDate" name="date_reported"
+                 value="{{ item.date_reported if item else '' }}" required>
+        </div>
+
+        <!-- Image upload -->
+        <div class="input-sk-group mb-4">
+          <label for="reportImage">Photo (optional)</label>
+          <input type="file" class="form-control" id="reportImage" name="image"
+                 accept="image/png,image/jpg,image/jpeg,image/gif">
+          {% if item and item.image_filename %}
+          <p style="color:var(--muted2);font-size:.82rem;margin-top:6px;">
+            Current: <span style="color:var(--muted);">{{ item.image_filename }}</span>
+          </p>
+          {% endif %}
+        </div>
+
+        <div class="d-flex gap-3 flex-wrap">
+          <button type="submit" class="btn-sk-primary flex-grow-1" style="padding:13px;justify-content:center;">
+            {% if item %}<i class="fa-solid fa-pen-to-square me-2"></i>Update Item
+            {% else %}<i class="fa-solid fa-plus me-2"></i>Submit Report{% endif %}
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="btn-sk-secondary" style="padding:13px 24px;">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
